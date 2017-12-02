@@ -27,7 +27,8 @@ double latiGoal, longiGoal, latiNext, longiNext;
 std::string utm_zone;
 std::string path_local, path_abs;
 
-int countWaypointsInFile(std::string path_local)
+int 
+countWaypointsInFile(std::string path_local)
 {
     path_abs = ros::package::getPath("outdoor_waypoint_nav") + path_local;
     std::ifstream fileCount(path_abs.c_str());
@@ -52,7 +53,8 @@ int countWaypointsInFile(std::string path_local)
     return numWaypoints;
 }
 
-std::vector <std::pair<double, double>> getWaypoints(std::string path_local)
+std::vector <std::pair<double, double>> 
+getWaypoints(std::string path_local)
 {
     double lati = 0, longi = 0;
 
@@ -68,7 +70,7 @@ std::vector <std::pair<double, double>> getWaypoints(std::string path_local)
 
     //Outputting vector
     ROS_INFO("The following GPS Waypoints have been set:");
-    for(std::vector < std::pair < double, double >> ::iterator iterDisp = waypointVect.begin(); iterDisp != waypointVect.end();
+    for(std::vector< std::pair< double, double >>::iterator iterDisp = waypointVect.begin(); iterDisp != waypointVect.end();
     iterDisp++)
     {
         ROS_INFO("%.9g %.9g", iterDisp->first, iterDisp->second);
@@ -76,7 +78,8 @@ std::vector <std::pair<double, double>> getWaypoints(std::string path_local)
     return waypointVect;
 }
 
-geometry_msgs::PointStamped latLongtoUTM(double lati_input, double longi_input)
+geometry_msgs::PointStamped
+latLongtoUTM(double lati_input, double longi_input)
 {
     double utm_x = 0, utm_y = 0;
     geometry_msgs::PointStamped UTM_point_output;
@@ -94,7 +97,8 @@ geometry_msgs::PointStamped latLongtoUTM(double lati_input, double longi_input)
     return UTM_point_output;
 }
 
-geometry_msgs::PointStamped UTMtoMapPoint(geometry_msgs::PointStamped UTM_input)
+geometry_msgs::PointStamped 
+UTMtoMapPoint(geometry_msgs::PointStamped UTM_input)
 {
     geometry_msgs::PointStamped map_point_output;
     bool notDone = true;
@@ -119,7 +123,8 @@ geometry_msgs::PointStamped UTMtoMapPoint(geometry_msgs::PointStamped UTM_input)
     return map_point_output;
 }
 
-move_base_msgs::MoveBaseGoal buildGoal(geometry_msgs::PointStamped map_point, geometry_msgs::PointStamped map_next, bool last_point)
+move_base_msgs::MoveBaseGoal
+buildGoal(geometry_msgs::PointStamped map_point, geometry_msgs::PointStamped map_next, bool last_point)
 {
     move_base_msgs::MoveBaseGoal goal;
 
