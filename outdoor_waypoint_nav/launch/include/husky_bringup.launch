@@ -1,16 +1,16 @@
 <?xml version="1.0"?>
 
 <launch>
-    <arg name="port" default="$(optenv HUSKY_PORT /dev/prolific)" />
+    <arg name="port" default="$(optenv HUSKY_PORT /dev/prolific)"/>
     <!--arg name="laser_enabled" value="false" />
     <arg name="ur5_enabled" value="false" /> 
-    <arg name="kinect_enabled" value="false" /-->      
+    <arg name="kinect_enabled" value="false" /-->
 
     <!-- Load robot description -->
     <include file="$(find husky_description)/launch/description.launch">
-      <!--arg name="laser_enabled" value="$(arg laser_enabled)"/>
-      <arg name="ur5_enabled" value="$(arg ur5_enabled)"/>
-      <arg name="kinect_enabled" value="$(arg kinect_enabled)"/-->
+        <!--arg name="laser_enabled" value="$(arg laser_enabled)"/>
+        <arg name="ur5_enabled" value="$(arg ur5_enabled)"/>
+        <arg name="kinect_enabled" value="$(arg kinect_enabled)"/-->
     </include>
 
     <!-- Husky harware driver -->
@@ -29,15 +29,15 @@
     </node>
 
     <!-- Differential controller parameters and basic localization -->
-    <include file="$(find husky_control)/launch/control.launch" />
+    <include file="$(find husky_control)/launch/control.launch"/>
 
     <!--Teleop -->
-    <include file="$(find husky_control)/launch/teleop.launch" />
+    <include file="$(find husky_control)/launch/teleop.launch"/>
 
     <!-- Diagnostic Aggregator -->
     <node pkg="diagnostic_aggregator" type="aggregator_node" name="diagnostic_aggregator">
         <rosparam command="load" file="$(find husky_base)/config/diagnostics.yaml"/>
     </node>
-    
+
 </launch>
 
