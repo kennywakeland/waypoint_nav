@@ -13,16 +13,19 @@
 #include <tf/transform_listener.h>
 #include <math.h>
 
+#include "waypoint_utils.h"
 
 // initialize variables
 
-typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient; //create a type definition for a client called MoveBaseClient
+typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction>
+MoveBaseClient; //create a type definition for a client called MoveBaseClient
 
-int count = 0, waypointCount = 0, wait_count = 0;
-double numWaypoints=0, latiGoal, longiGoal, latiNext, longiNext, x, y, goal_tolerance;
-bool end_on_controller_1=false;
+int count = 0, wait_count = 0;
+int numWaypoints = 0;
+double latiGoal, longiGoal, latiNext, longiNext, x, y, goal_tolerance;
+bool end_on_controller_1 = false;
 
-std::vector<std::pair<double,double> > waypointVect;
+std::vector<std::pair<double, double> > waypointVect;
 std::vector<std::pair<double, double> >::iterator iter; //init. iterator
 std::string utm_zone;
 std::string path_local, path_abs;
@@ -30,114 +33,6 @@ std::string path_local, path_abs;
 geometry_msgs::PointStamped UTM_point, map_point, UTM_next, map_next;
 std_msgs::Bool controller_1_done, controller_2_done;
 
-int countWaypointsInFile(std::string path_local)
-{
-    path_abs = ros::package::getPath("outdoor_waypoint_nav") + path_local;
-    std::ifstream fileCount(path_abs.c_str());
-    if(fileCount.is_open())
-    {
-        double lati=0;
-
-        while(!fileCount.eof())
-        {
-            fileCount >> lati;
-            ++count;
-        }
-
-        count = count - 1;
-        numWaypoints = count / 2;
-        ROS_INFO("%.0f GPS waypoints were read", numWaypoints);
-        fileCount.close();
-    }
-    else
-    {
-        std::cout << "Unable to open waypoint file" << std::endl;
-        ROS_ERROR("Unable to open waypoint file");
-    }
-    return numWaypoints;
-}
-
-std::vector <std::pair<double, double>> getWaypoints(std::string path_local)
-{
-    double lati=0, longi=0;
-    path_abs = ros::package::getPath("outdoor_waypoint_nav") + path_local;
-    std::ifstream fileRead(path_abs.c_str());
-    for(int i = 0; i < numWaypoints; i++)
-    {
-        fileRead >> lati;
-        fileRead >> longi;
-        waypointVect.push_back(std::make_pair(lati, longi));
-    }
-    fileRead.close();
-
-    //Outputting vector
-    ROS_INFO("The following GPS Waypoints have been set:");
-    for(std::vector < std::pair < double, double > > ::iterator iterDisp = waypointVect.begin(); iterDisp != waypointVect.end();
-    iterDisp++)
-    {
-        ROS_INFO("%.9g %.9g", iterDisp->first, iterDisp->second);
-    }
-    return waypointVect;
-}
-
-geometry_msgs::PointStamped latLongtoUTM(double lati_input, double longi_input)
-{
-    double utm_x = 0, utm_y = 0;
-    geometry_msgs::PointStamped UTM_point_output;
-
-    //convert lat/long to utm
-    RobotLocalization::NavsatConversions::LLtoUTM(lati_input, longi_input, utm_y, utm_x, utm_zone);
-
-    //Construct UTM_point and map_point geometry messages
-    UTM_point_output.header.frame_id = "utm";
-    UTM_point_output.header.stamp = ros::Time(0);
-    UTM_point_output.point.x = utm_x;
-    UTM_point_output.point.y = utm_y;
-    UTM_point_output.point.z = 0;
-
-    return UTM_point_output;
-}
-
-geometry_msgs::PointStamped UTMtoMapPoint(geometry_msgs::PointStamped UTM_input)
-{
-    geometry_msgs::PointStamped map_point_output;
-    bool notDone = true;
-    tf::TransformListener listener; //create transformlistener object called listener
-    ros::Time time_now = ros::Time::now();
-    while(notDone)
-    {
-        try
-        {
-            UTM_point.header.stamp = ros::Time::now();
-            listener.waitForTransform("odom", "utm", time_now, ros::Duration(3.0));
-            listener.transformPoint("odom", UTM_input, map_point_output);
-            notDone = false;
-        }
-        catch (tf::TransformException& ex)
-        {
-            ROS_WARN("%s", ex.what());
-            ros::Duration(0.01).sleep();
-            //return;
-        }
-    }
-    return map_point_output;
-}
-
-move_base_msgs::MoveBaseGoal buildGoal(geometry_msgs::PointStamped map_point)
-{
-    move_base_msgs::MoveBaseGoal goal;
-
-    //Specify what frame we want the goal to be published in
-    goal.target_pose.header.frame_id = "odom";
-    goal.target_pose.header.stamp = ros::Time::now();
-
-    // Specify x and y goal
-    goal.target_pose.pose.position.x = map_point.point.x; //specify x goal
-    goal.target_pose.pose.position.y = map_point.point.y; //specify y goal
-    goal.target_pose.pose.orientation.w = 1.0;    // don't care about heading because we aren't actually acheiving our goal
-
-    return goal;
-}
 
 void odometry_CB(const nav_msgs::Odometry::ConstPtr& odom_msg)
 {
@@ -203,10 +98,10 @@ int main(int argc, char** argv)
     numWaypoints = countWaypointsInFile(path_local);
 
     //Reading waypoints from text file and output results
-    waypointVect = getWaypoints(path_local);
+    waypointVect = getWaypoints(path_local, numWaypoints);
 
     // Iterate through vector of waypoints for setting goals
-    for(iter = waypointVect.begin(); iter < waypointVect.end(); iter++)
+    for(iter = waypointVect.begin(); iter < waypointVect.end() && ros::ok(); iter++)
     {
         //Setting goal:
         latiGoal = iter->first;

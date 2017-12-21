@@ -20,10 +20,10 @@ roslaunch_add_file_check(launch)
 include_directories(
   ${catkin_INCLUDE_DIRS}
 )
-add_executable(gps_waypoint src/gps_waypoint.cpp)
+add_executable(gps_waypoint src/gps_waypoint.cpp src/waypoint_utils.h)
 #add_executable(gps_waypoint_continuous src/gps_waypoint_continuous.cpp)
-add_executable(gps_waypoint_continuous1 src/gps_waypoint_continuous1.cpp)
-add_executable(gps_waypoint_continuous2 src/gps_waypoint_continuous2.cpp)
+add_executable(gps_waypoint_continuous1 src/gps_waypoint_continuous1.cpp src/waypoint_utils.h)
+add_executable(gps_waypoint_continuous2 src/gps_waypoint_continuous2.cpp src/waypoint_utils.h)
 add_executable(gps_waypoint_mapping src/gps_waypoint_mapping.cpp)
 add_executable(collect_gps_waypoints src/collect_gps_waypoints.cpp)
 add_executable(plot_gps_waypoints src/plot_gps_waypoints.cpp)
