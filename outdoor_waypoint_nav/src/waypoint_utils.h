@@ -79,7 +79,7 @@ geometry_msgs::PointStamped latLongtoUTM(double lati_input, double longi_input)
 }
 
 geometry_msgs::PointStamped
-UTMtoMapPoint(geometry_msgs::PointStamped UTM_input)
+UTMtoMapPoint(const geometry_msgs::PointStamped& utm_input)
 {
     geometry_msgs::PointStamped map_point_output;
     bool notDone = true;
@@ -90,7 +90,7 @@ UTMtoMapPoint(geometry_msgs::PointStamped UTM_input)
         try
         {
             listener.waitForTransform("odom", "utm", time_now, ros::Duration(0.5));
-            listener.transformPoint("odom", UTM_input, map_point_output);
+            listener.transformPoint("odom", utm_input, map_point_output);
             notDone = false;
         }
         catch (tf::TransformException& ex)
